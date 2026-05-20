@@ -37,7 +37,7 @@ robot:
   max_w_cmd: 1.2
   wheel_base: 0.10
   # dönüş yönünü düzeltmek için
-  #omega_sign: -1.0
+  omega_sign: -1.0
 
   wheel_cmd_gain: 2.0     # Bunu ekle
   max_wheel_cmd: 1.2      # Bunu ekle
@@ -69,23 +69,23 @@ dwa:
   min_v: 0.03
   max_v: 0.2
 
-  min_w: -2.0
-  max_w: 2.0
+  min_w: -0.8
+  max_w: 0.8
 
   max_accel_v: 0.30
-  max_accel_w: 4.0
+  max_accel_w: 2.0
 
   v_samples: 8
   w_samples: 21
 
   dt: 0.1
-  horizon: 1.6
+  horizon: 1.0
 
 cost:
-  path_weight: 1.0
-  goal_weight: 1.7
+  path_weight: 4.0
+  goal_weight: 2.0
   obstacle_weight: 2.0
-  heading_weight: 0.4
+  heading_weight: 1.0
 
 control:
   loop_rate: 10

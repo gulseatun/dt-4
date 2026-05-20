@@ -314,7 +314,7 @@ class AStarDWAPlanner:
                 closest_idx = i
         
         # Yaklaşık 6 nokta ilerisine bak (yumuşak dönüş sağlar)
-        lookahead_distance = 6 
+        lookahead_distance = 2 
         target_idx = min(len(self.global_path) - 1, closest_idx + lookahead_distance)
         return self.global_path[target_idx]
 
@@ -400,22 +400,22 @@ class AStarDWAPlanner:
         return best_control, best_trajectory, all_trajectories
 
     def publish_cmd(self, v, w):
-        robot_cfg = self.cfg["robot"]
+            robot_cfg = self.cfg["robot"]
+            max_v_cmd = robot_cfg["max_v_cmd"]
+            max_w_cmd = robot_cfg["max_w_cmd"]
+            
+            # Buradaki -1.0 çarpanı robotu sağa yerine sola döndürecektir.
+            # Simülasyonda test et, eğer düzelirse YAML'dan omega_sign'ı yönet.
+            omega_correction = -1.0 
 
-        max_v_cmd = robot_cfg.get("max_v_cmd", 0.10)
-        max_w_cmd = robot_cfg.get("max_w_cmd", 1.2)
+            v_out = max(-max_v_cmd, min(max_v_cmd, v))
+            w_out = max(-max_w_cmd, min(max_w_cmd, w))
 
-        v = max(-max_v_cmd, min(max_v_cmd, v))
-        w = max(-max_w_cmd, min(max_w_cmd, w))
-
-        msg = Twist2DStamped()
-        msg.header.stamp = rospy.Time.now()
-        msg.v = v
-        msg.omega = w
-
-        self.cmd_pub.publish(msg)
-
-        return v, w
+            msg = Twist2DStamped()
+            msg.header.stamp = rospy.Time.now()
+            msg.v = v_out
+            msg.omega = omega_correction * w_out # YÖN DÜZELTME
+            self.cmd_pub.publish(msg)
 
     def update_internal_pose(self, v, w, dt):
         self.state[0] += v * math.cos(self.state[2]) * dt
