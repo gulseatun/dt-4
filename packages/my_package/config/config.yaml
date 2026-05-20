@@ -16,7 +16,7 @@ start:
   #theta: 1.57   → robot +y yönüne / yukarı bakıyor
   #theta: 3.14   → robot -x yönüne / sola bakıyor
   #theta: -1.57  → robot -y yönüne / aşağı bakıyor
-  theta: 0.785
+  theta: 0.0
 
 goal:
   x: 1.35
@@ -29,18 +29,12 @@ obstacle:
 
 
 robot:
-  radius: 0.10
-  safety_margin: 0.07
+  radius: 0.07
+  safety_margin: 0.04
   sensing_radius: 0.45
 
-  max_v_cmd: 0.2
-  max_w_cmd: 1.2
-  wheel_base: 0.10
-  # dönüş yönünü düzeltmek için
-  omega_sign: -1.0
-
-  wheel_cmd_gain: 2.0     # Bunu ekle
-  max_wheel_cmd: 1.2      # Bunu ekle
+  max_v_cmd: 0.08
+  max_w_cmd: 0.5
 
 #robot:
  
@@ -67,25 +61,28 @@ robot:
 
 dwa:
   min_v: 0.03
-  max_v: 0.2
+  max_v: 0.08
 
-  min_w: -0.8
-  max_w: 0.8
+  min_w: -0.5
+  max_w: 0.5
 
-  max_accel_v: 0.30
-  max_accel_w: 2.0
+  max_accel_v: 0.12
+  max_accel_w: 0.6
 
   v_samples: 8
-  w_samples: 21
+  w_samples: 15
 
   dt: 0.1
-  horizon: 1.0
+  horizon: 0.7
 
 cost:
   path_weight: 4.0
-  goal_weight: 2.0
+  goal_weight: 1.5
   obstacle_weight: 2.0
   heading_weight: 1.0
+  angular_weight: 2.0
+  angular_smooth_weight: 1.0
+  speed_weight: 0.2
 
 control:
   loop_rate: 10

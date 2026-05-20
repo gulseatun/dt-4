@@ -294,10 +294,20 @@ class AStarDWAPlanner:
         return False
 
     def path_cost(self, trajectory):
-        end = trajectory[-1]
-        end_xy = (end[0], end[1])
-        min_dist = min([self.distance(end_xy, p) for p in self.global_path])
-        return min_dist
+        if len(trajectory) == 0 or len(self.global_path) == 0:
+            return float("inf")
+
+        total_dist = 0.0
+        max_dist = 0.0
+
+        for x, y, _ in trajectory:
+            d = min(self.distance((x, y), p) for p in self.global_path)
+            total_dist += d
+            max_dist = max(max_dist, d)
+
+        avg_dist = total_dist / len(trajectory)
+
+        return avg_dist + 0.5 * max_dist
 
     def goal_cost(self, trajectory):
         end = trajectory[-1]
@@ -385,11 +395,18 @@ class AStarDWAPlanner:
                 o_cost = self.obstacle_cost(trajectory, obstacles)
                 h_cost = self.heading_cost(trajectory)
 
+                angular_cost = abs(w)
+                angular_smooth_cost = abs(w - self.current_w)
+                speed_cost = max(0.0, dwa["max_v"] - v)
+
                 total_cost = (
                     cost_cfg["path_weight"] * p_cost +
                     cost_cfg["goal_weight"] * g_cost +
                     cost_cfg["obstacle_weight"] * o_cost +
-                    cost_cfg["heading_weight"] * h_cost
+                    cost_cfg["heading_weight"] * h_cost +
+                    cost_cfg.get("angular_weight", 0.0) * angular_cost +
+                    cost_cfg.get("angular_smooth_weight", 0.0) * angular_smooth_cost +
+                    cost_cfg.get("speed_weight", 0.0) * speed_cost
                 )
 
                 if total_cost < best_cost:
@@ -400,22 +417,22 @@ class AStarDWAPlanner:
         return best_control, best_trajectory, all_trajectories
 
     def publish_cmd(self, v, w):
-            robot_cfg = self.cfg["robot"]
-            max_v_cmd = robot_cfg["max_v_cmd"]
-            max_w_cmd = robot_cfg["max_w_cmd"]
-            
-            # Buradaki -1.0 çarpanı robotu sağa yerine sola döndürecektir.
-            # Simülasyonda test et, eğer düzelirse YAML'dan omega_sign'ı yönet.
-            omega_correction = -1.0 
+        robot_cfg = self.cfg["robot"]
 
-            v_out = max(-max_v_cmd, min(max_v_cmd, v))
-            w_out = max(-max_w_cmd, min(max_w_cmd, w))
+        max_v_cmd = robot_cfg.get("max_v_cmd", 0.10)
+        max_w_cmd = robot_cfg.get("max_w_cmd", 1.0)
 
-            msg = Twist2DStamped()
-            msg.header.stamp = rospy.Time.now()
-            msg.v = v_out
-            msg.omega = omega_correction * w_out # YÖN DÜZELTME
-            self.cmd_pub.publish(msg)
+        v_out = max(-max_v_cmd, min(max_v_cmd, v))
+        w_out = max(-max_w_cmd, min(max_w_cmd, w))
+
+        msg = Twist2DStamped()
+        msg.header.stamp = rospy.Time.now()
+        msg.v = v_out
+        msg.omega = w_out
+
+        self.cmd_pub.publish(msg)
+
+        return v_out, w_out
 
     def update_internal_pose(self, v, w, dt):
         self.state[0] += v * math.cos(self.state[2]) * dt
