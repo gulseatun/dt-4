@@ -262,7 +262,7 @@ class AStarDWAPlanner:
         self.dynamic_obstacles.append((ox, oy, obs_radius))
 
         rospy.loginfo(
-            f"NEW ToF obstacle mapped at ({ox:.2f}, {oy:.2f}). Replanning A* path..."
+            f"NEW obstacle mapped at ({ox:.2f}, {oy:.2f}). Replanning A* path..."
         )
 
         return True
@@ -401,9 +401,9 @@ class AStarDWAPlanner:
 
     def publish_cmd(self, v, w):
         robot_cfg = self.cfg["robot"]
-        max_v_cmd = robot_cfg["max_v_cmd"]
-        max_w_cmd = robot_cfg["max_w_cmd"]
-        omega_sign = robot_cfg.get("omega_sign", 1.0)
+
+        max_v_cmd = robot_cfg.get("max_v_cmd", 0.10)
+        max_w_cmd = robot_cfg.get("max_w_cmd", 1.2)
 
         v = max(-max_v_cmd, min(max_v_cmd, v))
         w = max(-max_w_cmd, min(max_w_cmd, w))
@@ -411,8 +411,11 @@ class AStarDWAPlanner:
         msg = Twist2DStamped()
         msg.header.stamp = rospy.Time.now()
         msg.v = v
-        msg.omega = omega_sign * w
+        msg.omega = w
+
         self.cmd_pub.publish(msg)
+
+        return v, w
 
     def update_internal_pose(self, v, w, dt):
         self.state[0] += v * math.cos(self.state[2]) * dt
@@ -422,6 +425,8 @@ class AStarDWAPlanner:
 
     def stop_robot(self):
         self.publish_cmd(0.0, 0.0)
+        self.current_v = 0.0
+        self.current_w = 0.0
         rospy.loginfo("Motors stopped.")
 
     def reached_goal(self):
@@ -629,7 +634,7 @@ class AStarDWAPlanner:
             )
             cv2.putText(
                 canvas,
-                "Orange: ToF mapped",
+                "Orange: ToF mapped obstacle",
                 (canvas_w - 230, 155),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.45,
@@ -639,7 +644,7 @@ class AStarDWAPlanner:
         else:
             cv2.putText(
                 canvas,
-                "Orange: ToF mapped",
+                "Orange: ToF mapped obstacle",
                 (canvas_w - 230, 130),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.45,
@@ -684,10 +689,10 @@ class AStarDWAPlanner:
             self.current_v = v
             self.current_w = w
 
-            self.publish_cmd(v, w)
+            sent_v, sent_w = self.publish_cmd(v, w)
 
             if self.cfg.get("simulation", {}).get("use_internal_pose", True):
-                self.update_internal_pose(v, w, dt)
+                self.update_internal_pose(sent_v, sent_w, dt)
 
             self.visualize(best_trajectory, all_trajectories)
 

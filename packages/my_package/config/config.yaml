@@ -16,7 +16,7 @@ start:
   #theta: 1.57   → robot +y yönüne / yukarı bakıyor
   #theta: 3.14   → robot -x yönüne / sola bakıyor
   #theta: -1.57  → robot -y yönüne / aşağı bakıyor
-  theta: math.pi/4
+  theta: 0.785
 
 goal:
   x: 1.35
@@ -37,7 +37,7 @@ robot:
   max_w_cmd: 1.2
   wheel_base: 0.10
   # dönüş yönünü düzeltmek için
-  omega_sign: -1.0
+  #omega_sign: -1.0
 
   wheel_cmd_gain: 2.0     # Bunu ekle
   max_wheel_cmd: 1.2      # Bunu ekle

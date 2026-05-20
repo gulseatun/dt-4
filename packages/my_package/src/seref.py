@@ -131,7 +131,7 @@ class AStarDWAPlanner:
 
     def get_all_obstacles(self):
         """Döndürülen listede hem YAML'dan gelen statik hem de ToF ile bulunan dinamik engeller vardır."""
-        return [self.static_obstacle] + self.mapped_dynamic_obstacles
+        return self.mapped_dynamic_obstacles
 
     def update_dynamic_obstacles(self):
         """Yeni bir engel tespit edilirse True döndürerek A* Replan mekanizmasını tetikler."""
