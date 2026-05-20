@@ -6,10 +6,17 @@ map:
   height: 1.5
   resolution: 0.05
 
+
 start:
   x: 0.15
   y: 0.15
-  theta: 0.0
+  # theta: 0.0, robotun başlangıçta +x yönüne baktığı anlamına geliyor.
+  # theta = pi/2: +y yönüne bakıyor
+  #theta: 0.0    → robot +x yönüne / sağa bakıyor
+  #theta: 1.57   → robot +y yönüne / yukarı bakıyor
+  #theta: 3.14   → robot -x yönüne / sola bakıyor
+  #theta: -1.57  → robot -y yönüne / aşağı bakıyor
+  theta: math.pi/4
 
 goal:
   x: 1.35
@@ -20,25 +27,47 @@ obstacle:
   y: 0.75
   radius: 0.08
 
+
 robot:
   radius: 0.10
-  safety_margin: 0.05
+  safety_margin: 0.07
   sensing_radius: 0.45
 
-  # Duckiebot approximate wheel distance.
+  max_v_cmd: 0.2
+  max_w_cmd: 1.2
   wheel_base: 0.10
+  # dönüş yönünü düzeltmek için
+  omega_sign: -1.0
+
+  wheel_cmd_gain: 2.0     # Bunu ekle
+  max_wheel_cmd: 1.2      # Bunu ekle
+
+#robot:
+ 
+
+  # Duckiebot approximate wheel distance.
+  #wheel_base: 0.10
 
   # Converts linear wheel velocity estimate to Duckiebot wheel command.
   # If robot is too slow, increase this.
   # If robot is too aggressive, decrease this.
-  wheel_cmd_gain: 3.0
+  #wheel_cmd_gain: 3.0
 
   # Duckietown wheel commands are usually normalized.
-  max_wheel_cmd: 0.45
+  #max_wheel_cmd: 0.45
+
+
+#Eğer robot hiç dönemiyorsa:
+#dwa:
+ # max_w: 2.0
+  #min_w: -2.0
+#robot:
+ # wheel_cmd_gain: 3.5
+
 
 dwa:
-  min_v: 0.00
-  max_v: 0.18
+  min_v: 0.03
+  max_v: 0.2
 
   min_w: -2.0
   max_w: 2.0
@@ -55,15 +84,13 @@ dwa:
 cost:
   path_weight: 1.0
   goal_weight: 1.7
-  obstacle_weight: 2.8
+  obstacle_weight: 2.0
   heading_weight: 0.4
 
 control:
   loop_rate: 10
   goal_tolerance: 0.08
 
-visualization:
-  enabled: true
 
 simulation:
   # true: node updates robot pose internally.
@@ -74,4 +101,12 @@ simulation:
 bonus:
   # false: uses known obstacle from YAML.
   # true: estimates obstacle from front ToF sensor at runtime.
-  unknown_obstacle: false
+
+  unknown_obstacle: true
+  include_static_obstacle_when_bonus: false
+
+visualization:
+  enabled: true
+  canvas_width: 700
+  canvas_height: 700
+  margin: 60

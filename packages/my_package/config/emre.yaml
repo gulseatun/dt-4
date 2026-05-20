@@ -1,0 +1,61 @@
+# ==========================================
+# Duckiebot A* + DWA Assignment 4 Config
+# ==========================================
+
+ros:
+  vehicle_name: "bear" # Robotunun adı (Hostname)
+
+map:
+  width: 1.5           # Harita genişliği (metre)
+  height: 1.5          # Harita yüksekliği (metre)
+  resolution: 0.05     # Grid çözünürlüğü (metre)
+
+start:
+  x: 0.1               # Başlangıç A noktası X
+  y: 0.1               # Başlangıç A noktası Y
+  theta: 0.78          # Başlangıç yönü (Radyan - 0.78 = 45 derece)
+
+goal:
+  x: 1.3               # Hedef B noktası X
+  y: 1.3               # Hedef B noktası Y
+
+obstacle:
+  x: 0.75              # Statik engel X
+  y: 0.75              # Statik engel Y
+  radius: 0.05         # Engelin fiziksel yarıçapı (5cm)
+
+robot:
+  radius: 0.1          # Robotun fiziksel yarıçapı
+  safety_margin: 0.05  # Ekstra güvenlik payı
+  sensing_radius: 0.4  # ToF sensörünün algılama mesafesi (Bonus)
+  wheel_base: 0.108    # İki tekerlek arası mesafe (Metre)
+  wheel_cmd_gain: 1.0  # Motor güç katsayısı
+  max_wheel_cmd: 1.0   # Maksimum motor PWM değeri
+
+dwa:
+  dt: 0.1              # Simülasyon zaman adımı
+  horizon: 2.0         # Geleceği tahmin etme süresi (saniye)
+  v_samples: 11        # Çizilecek hız örnek sayısı (Tek sayı!)
+  w_samples: 21        # Çizilecek dönüş örnek sayısı (Tek sayı!)
+  min_v: 0.0           # Minimum ileri hız
+  max_v: 0.22          # Maksimum ileri hız
+  min_w: -2.0          # Maksimum sağa dönüş hızı
+  max_w: 2.0           # Maksimum sola dönüş hızı
+  max_accel_v: 0.2     # Maksimum ileri ivmelenme
+  max_accel_w: 1.5     # Maksimum dönüş ivmelenmesi
+
+cost:
+  path_weight: 1.0     # A* rotasına sadık kalma ağırlığı
+  goal_weight: 1.0     # Final hedefine yönelme ağırlığı
+  obstacle_weight: 2.5 # Engellerden kaçma önceliği (Yüksek = Korkak robot)
+  heading_weight: 0.8  # Bir sonraki waypoint'e bakma ağırlığı
+
+bonus:
+  unknown_obstacle: True # ToF sensörü aktif mi? (Task 5)
+
+control:
+  goal_tolerance: 0.1  # Hedefe kaç cm kala "ulaşıldı" sayılsın?
+  loop_rate: 10        # DWA döngü hızı (Hz)
+
+simulation:
+  use_internal_pose: True # Odometri yoksa kendi konumunu tahmin etsin mi?
